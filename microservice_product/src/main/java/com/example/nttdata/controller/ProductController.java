@@ -1,6 +1,6 @@
 package com.example.nttdata.controller;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,7 +16,11 @@ import com.example.nttdata.model.Product;
 import com.example.nttdata.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/api")
 @RequiredArgsConstructor
@@ -25,29 +29,51 @@ public class ProductController {
 	@Autowired
 	private ProductService productService;
 	
-	@PostMapping("/postProduct")
-	public void save(@RequestBody Product product) {
-		productService.save(product);
+	@PostMapping("/product")
+	public Mono<Product> save(@RequestBody Product product) {
+		return productService.save(product);
 	}
 	
-	@GetMapping("/getProduct")
-	public List<Product> findAll(){
+	@GetMapping("/product")
+	public Flux<Product> findAll(){
 		return productService.findAll();
 	}
 	
-	@GetMapping("/finByIdProduct/{id}")
-	public Product findById(@PathVariable String id){
-		return productService.findById(id).get();
+	@GetMapping("/product/{id}")
+	public Mono<Product> findById(@PathVariable String id){
+		return productService.findById(id);
 	}
 	
-	@DeleteMapping("/deleteProduct/{id}")
+	@DeleteMapping("/product/{id}")
 	public void deleteById(@PathVariable String id){
 		productService.deleteById(id);
 	}
 	
-	@PutMapping("/updateProduct")
-	public void update(@RequestBody Product product){
-		 productService.save(product);
+	@PutMapping("/product")
+	public Mono<Product> update(@RequestBody Product product){
+		 return productService.save(product);
 	}
 	
+	@GetMapping("/balanceByAccount/{accountNumber}")
+	public Optional<Double> getBalance(@PathVariable Long accountNumber) {
+		return productService.getBalance(accountNumber);
+		
+	}
+	
+	@GetMapping("/creditLimitByAccount/{accountNumber}")
+	public Optional<Double> getCreditLimit(@PathVariable Long accountNumber){
+		return productService.getCreditLimit(accountNumber);
+	}
+	
+	//
+	/*@GetMapping("/creditLimitByAccount/{accountNumber}")
+	public Mono<Product> findById(@PathVariable String id){
+		return productService.findById(id);
+	}
+	
+	@GetMapping("/creditLimitByAccount/{accountNumber}")
+	public Mono<Product> findById(@PathVariable String id){
+		return productService.findById(id);
+	}*/
 }
+	
