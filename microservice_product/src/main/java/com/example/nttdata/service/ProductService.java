@@ -1,6 +1,5 @@
 package com.example.nttdata.service;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,30 +8,47 @@ import org.springframework.stereotype.Service;
 import com.example.nttdata.model.Product;
 import com.example.nttdata.repository.ProductRepository;
 
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor 
-@AllArgsConstructor
-public class ProductService {
+public class ProductService implements IProductService {
 	
 	@Autowired
-	private ProductRepository productRepository;
+	private final ProductRepository productRepository = null;
 	
-	public void save(Product product) {
-		productRepository.save(product);
+	public Mono<Product> save(Product product) {
+		return productRepository.save(product);
 	}
 	
-	public List<Product> findAll(){
+	public Flux<Product> findAll(){
 		return productRepository.findAll();
 	}
 	
-	public Optional<Product> findById(String id) {
+	public Mono<Product> findById(String id) {
 		return productRepository.findById(id);
 	}
 	
 	public void deleteById(String id) {
-		productRepository.deleteById(id);
+		productRepository.deleteById(id).subscribe();
 	}
+	
+	public Optional<Double> getBalance(Long accountNumber) {
+		return productRepository.findBalanceByAccountNumber(accountNumber)
+				.map(Product::getBalance);
+	}
+	
+	public Optional<Double> getCreditLimit(Long accountNumber) {
+		return getType(accountNumber)
+				.filter(type -> type.equals("creditcard"))
+				.flatMap(type -> productRepository.findCreditLimit(accountNumber))
+				.map(Product::getCreditLimit);					
+	}
+	
+	//Get product type 
+	public Optional<String> getType(Long accountNumber){
+		return productRepository.findProductType(accountNumber)
+				.map(Product::getType);
+	}
+	
 }
