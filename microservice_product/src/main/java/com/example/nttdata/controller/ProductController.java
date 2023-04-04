@@ -3,6 +3,7 @@ package com.example.nttdata.controller;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,36 +23,39 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/api")
+@RequestMapping(value = "/product")
 @RequiredArgsConstructor
 public class ProductController {
 	
 	@Autowired
 	private ProductService productService;
 	
-	@PostMapping("/product")
+	@PostMapping( produces = MediaType.APPLICATION_JSON_VALUE)
 	public Mono<Product> save(@RequestBody Product product) {
-		return productService.save(product);
+		return productService.save(product)
+				.doOnNext( (x) ->log.info("Cliente Registrado"));
 	}
 	
-	@GetMapping("/product")
+	@GetMapping(value="/products" ,produces = MediaType.APPLICATION_JSON_VALUE)
 	public Flux<Product> findAll(){
 		return productService.findAll();
 	}
 	
-	@GetMapping("/product/{id}")
+	//get by Id
+	@GetMapping("/{id}")
 	public Mono<Product> findById(@PathVariable String id){
 		return productService.findById(id);
 	}
 	
-	@DeleteMapping("/product/{id}")
+	@DeleteMapping("/{id}")
 	public void deleteById(@PathVariable String id){
 		productService.deleteById(id);
 	}
 	
-	@PutMapping("/product")
+	@PutMapping
 	public Mono<Product> update(@RequestBody Product product){
-		 return productService.save(product);
+		 return productService.save(product)
+				 .doOnSuccess((x) -> log.info("Cliente Modificado"));
 	}
 	
 	@GetMapping("/balanceByAccount/{accountNumber}")
@@ -63,6 +67,7 @@ public class ProductController {
 	@GetMapping("/creditLimitByAccount/{accountNumber}")
 	public Optional<Double> getCreditLimit(@PathVariable Long accountNumber){
 		return productService.getCreditLimit(accountNumber);
+			
 	}
 	
 	//
